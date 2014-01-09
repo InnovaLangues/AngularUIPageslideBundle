@@ -1,0 +1,40 @@
+{
+    "name" : "innova/angular-ui-pageslide-bundle",
+    "description" : "Symfony 2 bundle which provides Angular JS directive to add pageslide effect.",
+    "type" : "library",
+    "authors" : [{
+            "name" : "Arnaud Bey",
+            "email" : "arnaud.bey@u-grenoble3.fr"
+        }, {
+            "name" : "Axel Penin",
+            "email" : "axel.penin@u-grenoble3.fr"
+        }, {
+            "name" : "Eric Vincent",
+            "email" : "eric.vincent@u-grenoble3.fr"
+        }, {
+            "name" : "Donovan Tengblad",
+            "email" : "donovan.tengblad@u-grenoble3.fr"
+        }
+    ],
+    "keywords" : [
+        "angular",
+        "pageslide",
+        "symfony2"
+    ],
+    "homepage" : "http://github.com/InnovaLangues/AngularUIPageslideBundle",
+    "license" : [
+        "MIT"
+    ],
+    "require" : {
+        "symfony/symfony" : "2.*",
+        "php" : ">=5.3.0",
+        "claroline/kernel-bundle" : "~1.0",
+        "innova/angularjs" : "dev-master"
+    },
+    "autoload" : {
+        "psr-0" : {
+            "Innova\\AngularUIPageslideBundle" : "."
+        }
+    },
+    "target-dir" : "Innova/AngularUIPageslideBundle"
+}
