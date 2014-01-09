@@ -2,11 +2,13 @@
 
 Symfony 2 bundle which provides Angular JS directive to add pageslide effect.
 
+![SensioLabs Insight][1]
+
 ## Installation
 
 Install with composer :
 	
-	$ composer require "innova/angular-ui-pageslide-bundle" "1.0"
+	$ composer require "innova/angular-ui-pageslide-bundle" "1.*"
 
 ## Authors
 
@@ -14,3 +16,5 @@ Install with composer :
 * Axel Penin (Elorfin)
 * Arnaud Bay (arnaudbey)
 * Eric Vincent (ericvincenterv)
+
+[1]: https://insight.sensiolabs.com/projects/a73f6f1a-07d1-49bd-a847-ab7b6d3fd7d5/small.png
