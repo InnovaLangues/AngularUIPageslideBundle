@@ -1,4 +1,4 @@
-var pageslideDirective = angular.module("pageslide-directive", []);
+var pageslideDirective = angular.module('ui.pageslide', []);
 
 pageslideDirective.directive('pageslide', [
     '$http', 
