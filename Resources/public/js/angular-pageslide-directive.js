@@ -7,14 +7,13 @@ pageslideDirective.directive('pageslide', [
     '$rootScope', 
     function ($http, $log, $parse, $rootScope) {
         var defaults = {};
-        var str_inspect_hint = 'Add testing="testing" to inspect this object';
 
         /* Return directive definition object */
         return {
             restrict: "A",
             replace: false,
             transclude: false,
-            scope: {},
+            // scope: {},
             link: function ($scope, el, attrs) {
                 /* parameters */
                 var param = {};
@@ -43,11 +42,7 @@ pageslideDirective.directive('pageslide', [
                     body.style.webkitTransitionDuration = param.speed + 's';
                 }
 
-                /*
-                * Events
-                * */
-                el[0].onclick = function(e){
-                    e.preventDefault();
+                $scope.pageslideOpen = function() {
                     if (/ps-hidden/.exec(slider.className)){
                         if (slider.className.indexOf('ps-left') != -1) {
                             body.className += ' ps-push-left';
@@ -65,23 +60,35 @@ pageslideDirective.directive('pageslide', [
                     }
                 };
 
+                $scope.pageslideClose = function () {
+                    if (/ps-shown/.exec(slider.className)){
+                        if (slider.className.indexOf('ps-left') != -1) {
+                            body.className = body.className.replace('ps-push-left','');
+                        }
+
+                        if (slider.className.indexOf('ps-right') != -1) {
+                            body.className = body.className.replace('ps-push-right','');
+                        }
+                        content.style.display = 'none';
+                        slider.className = slider.className.replace('ps-shown','');
+                        slider.className += 'ps-hidden';
+                    }
+                };
+
+                /**
+                 * Events
+                 */
+                el[0].onclick = function(e){
+                    e.preventDefault();
+                    $scope.pageslideOpen();
+                };
+
                 var close_handler = document.getElementById(attrs.href.substr(1) + '-close');
 
                 if (close_handler){
                     close_handler.onclick = function(e){
                         e.preventDefault();
-                        if (/ps-shown/.exec(slider.className)){
-                            if (slider.className.indexOf('ps-left') != -1) {
-                                body.className = body.className.replace('ps-push-left','');
-                            }
-
-                            if (slider.className.indexOf('ps-right') != -1) {
-                                body.className = body.className.replace('ps-push-right','');
-                            }
-                            content.style.display = 'none';
-                            slider.className = slider.className.replace('ps-shown','');
-                            slider.className += 'ps-hidden';
-                        }
+                        $scope.pageslideClose();
                     };
                 }
             }
