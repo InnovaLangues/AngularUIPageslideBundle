@@ -3,18 +3,8 @@
 namespace Innova\AngularUIPageslideBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
-use Claroline\KernelBundle\Bundle\AutoConfigurableInterface;
-use Claroline\KernelBundle\Bundle\ConfigurationBuilder;
 
-class InnovaAngularUIPageslideBundle extends Bundle implements AutoConfigurableInterface
+class InnovaAngularUIPageslideBundle extends Bundle
 {
-    public function supports($environment)
-    {
-        return true;
-    }
-    
-    public function getConfiguration($environment)
-    {
-        return new ConfigurationBuilder();
-    }
+
 }
