@@ -8,7 +8,7 @@ Symfony 2 bundle which provides Angular JS directive to add pageslide effect.
 
 Install with composer :
 	
-	$ composer require "innova/angular-ui-pageslide-bundle" "1.*"
+	$ composer require "innova/angular-ui-pageslide-bundle" "5.*"
 
 ## Authors
 
