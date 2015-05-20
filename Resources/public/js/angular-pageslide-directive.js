@@ -1,96 +1,245 @@
-var pageslideDirective = angular.module('ui.pageslide', []);
+angular.module("pageslide-directive", [])
 
-pageslideDirective.directive('pageslide', [
-    '$http', 
-    '$log', 
-    '$parse', 
-    '$rootScope', 
-    function ($http, $log, $parse, $rootScope) {
-        var defaults = {};
+    .directive('pageslide', [
+        function () {
+            var defaults = {};
 
-        /* Return directive definition object */
-        return {
-            restrict: "A",
-            replace: false,
-            transclude: false,
-            // scope: {},
-            link: function ($scope, el, attrs) {
-                /* parameters */
-                var param = {};
-                param.side = attrs.pageslide || 'right';
-                param.speed = attrs.psSpeed || '0.5';
+            /* Return directive definition object */
 
-                /* init */
-                var css_class = 'ng-pageslide ps-hidden';
-                css_class += ' ps-' + param.side;
+            return {
+                restrict: "EAC",
+                transclude: false,
+                scope: {
+                    psOpen: "=?",
+                    psAutoClose: "=?",
+                    psSide: "@",
+                    psSpeed: "@",
+                    psClass: "@",
+                    psSize: "@",
+                    psSqueeze: "@",
+                    psCloak: "@",
+                    psPush: "@",
+                    psPushClass: "@"
+                },
+                //template: '<div class="pageslide-content" ng-transclude></div>',
+                link: function ($scope, el, attrs) {
+                    /* Inspect */
+                    //console.log($scope);
+                    //console.log(el);
+                    //console.log(attrs);
 
-                /* DOM manipulation */
-                var content = document.getElementById(attrs.href.substr(1));
-                var slider = document.createElement('div');
-                var body = document.getElementsByTagName('body')[0];
-                slider.id = "ng-pageslide";
-                slider.className = css_class;
+                    /* Parameters */
+                    var param = {};
 
-                document.body.appendChild(slider);
-                slider.appendChild(content);
+                    param.side = $scope.psSide || 'right';
+                    param.speed = $scope.psSpeed || '0.5';
+                    param.size = $scope.psSize || '300px';
+                    param.zindex = 1000; // Override with custom CSS
+                    param.className = $scope.psClass || 'ng-pageslide';
+                    param.cloak = $scope.psCloak && $scope.psCloak.toLowerCase() == 'false' ? false : true;
+                    param.squeeze = Boolean($scope.psSqueeze) || false;
+                    param.push = Boolean($scope.psPush) || false;
+                    param.pushClass = $scope.psPushClass || 'ng-pageslide-container';
 
-                /* set CSS from parameters */
-                if (param.speed){
+                    // Apply Class
+                    el.addClass(param.className);
+
+                    /* DOM manipulation */
+                    var content = null;
+                    var slider = null;
+                    var body = document.body;
+
+                    slider = el[0];
+
+                    // Check for div tag
+                    if (slider.tagName.toLowerCase() !== 'div' &&
+                        slider.tagName.toLowerCase() !== 'pageslide')
+                        throw new Error('Pageslide can only be applied to <div> or <pageslide> elements');
+
+                    // Check for content
+                    if (slider.children.length === 0)
+                        throw new Error('You have to content inside the <pageslide>');
+
+                    content = angular.element(slider.children);
+
+                    /* Append */
+                    body.appendChild(slider);
+
+                    /* Style setup */
+                    slider.style.zIndex = param.zindex;
+                    slider.style.position = 'fixed'; // this is fixed because has to cover full page
+                    slider.style.width = 0;
+                    slider.style.height = 0;
+                    slider.style.overflow = 'hidden';
                     slider.style.transitionDuration = param.speed + 's';
                     slider.style.webkitTransitionDuration = param.speed + 's';
-                    body.style.transitionDuration = param.speed + 's';
-                    body.style.webkitTransitionDuration = param.speed + 's';
-                }
-
-                $scope.pageslideOpen = function() {
-                    if (/ps-hidden/.exec(slider.className)){
-                        if (slider.className.indexOf('ps-left') != -1) {
-                            body.className += ' ps-push-left';
-                        }
-
-                        if (slider.className.indexOf('ps-right') != -1) {
-                            body.className += ' ps-push-right';
-                        }
-                        content.style.display = 'none';
-                        slider.className = slider.className.replace(' ps-hidden','');
-                        slider.className += ' ps-shown';
-                        setTimeout(function(){
-                            content.style.display = 'block';
-                        },(param.speed * 1000));
+                    slider.style.transitionProperty = 'width, height';
+                    if (param.squeeze) {
+                        body.style.position = 'absolute';
+                        body.style.transitionDuration = param.speed + 's';
+                        body.style.webkitTransitionDuration = param.speed + 's';
+                        body.style.transitionProperty = 'top, bottom, left, right';
                     }
-                };
 
-                $scope.pageslideClose = function () {
-                    if (/ps-shown/.exec(slider.className)){
-                        if (slider.className.indexOf('ps-left') != -1) {
-                            body.className = body.className.replace('ps-push-left','');
-                        }
-
-                        if (slider.className.indexOf('ps-right') != -1) {
-                            body.className = body.className.replace('ps-push-right','');
-                        }
-                        content.style.display = 'none';
-                        slider.className = slider.className.replace('ps-shown','');
-                        slider.className += 'ps-hidden';
+                    switch (param.side){
+                        case 'right':
+                            slider.style.height = attrs.psCustomHeight || '100%';
+                            slider.style.top = attrs.psCustomTop ||  '0px';
+                            slider.style.bottom = attrs.psCustomBottom ||  '0px';
+                            slider.style.right = attrs.psCustomRight ||  '0px';
+                            break;
+                        case 'left':
+                            slider.style.height = attrs.psCustomHeight || '100%';
+                            slider.style.top = attrs.psCustomTop || '0px';
+                            slider.style.bottom = attrs.psCustomBottom || '0px';
+                            slider.style.left = attrs.psCustomLeft || '0px';
+                            break;
+                        case 'top':
+                            slider.style.width = attrs.psCustomWidth || '100%';
+                            slider.style.left = attrs.psCustomLeft || '0px';
+                            slider.style.top = attrs.psCustomTop || '0px';
+                            slider.style.right = attrs.psCustomRight || '0px';
+                            break;
+                        case 'bottom':
+                            slider.style.width = attrs.psCustomWidth || '100%';
+                            slider.style.bottom = attrs.psCustomBottom || '0px';
+                            slider.style.left = attrs.psCustomLeft || '0px';
+                            slider.style.right = attrs.psCustomRight || '0px';
+                            break;
                     }
-                };
 
-                /**
-                 * Events
-                 */
-                el[0].onclick = function(e){
-                    e.preventDefault();
-                    $scope.pageslideOpen();
-                };
 
-                var close_handler = document.getElementById(attrs.href.substr(1) + '-close');
+                    /* Closed */
+                    function psClose(slider,param){
+                        if (slider && slider.style.width !== 0 && slider.style.width !== 0){
+                            if (param.cloak) content.css('display', 'none');
+                            switch (param.side){
+                                case 'right':
+                                    slider.style.width = '0px';
+                                    if (param.squeeze) body.style.right = '0px';
+                                    if (param.push) {
+                                        body.style.right = '0px';
+                                        body.style.left = '0px';
+                                    }
 
-                if (close_handler){
-                    close_handler.onclick = function(e){
-                        e.preventDefault();
-                        $scope.pageslideClose();
-                    };
+                                    break;
+                                case 'left':
+                                    slider.style.width = '0px';
+                                    if (param.squeeze) body.style.left = '0px';
+                                    if (param.push) {
+                                        body.style.left = '0px';
+                                        body.style.right = '0px';
+                                    }
+                                    break;
+                                case 'top':
+                                    slider.style.height = '0px';
+                                    if (param.squeeze) body.style.top = '0px';
+                                    if (param.push) {
+                                        body.style.top = '0px';
+                                        body.style.bottom = '0px';
+                                    }
+                                    break;
+                                case 'bottom':
+                                    slider.style.height = '0px';
+                                    if (param.squeeze) body.style.bottom = '0px';
+                                    if (param.push) {
+                                        body.style.bottom = '0px';
+                                        body.style.top = '0px';
+                                    }
+                                    break;
+                            }
+
+                            body.className = body.className.replace(param.pushClass,'');
+                        }
+                        $scope.psOpen = false;
+                    }
+
+                    /* Open */
+                    function psOpen(slider, param){
+                        if (slider.style.width !== 0 && slider.style.width !== 0){
+                            switch (param.side){
+                                case 'right':
+                                    slider.style.width = param.size;
+                                    if (param.squeeze) body.style.right = param.size;
+                                    if (param.push) {
+                                        body.style.right = param.size;
+                                        body.style.left = "-" + param.size;
+                                    }
+                                    break;
+                                case 'left':
+                                    slider.style.width = param.size;
+                                    if (param.squeeze) body.style.left = param.size;
+                                    if (param.push) {
+                                        body.style.left = param.size;
+                                        body.style.right = "-" + param.size;
+                                    }
+                                    break;
+                                case 'top':
+                                    slider.style.height = param.size;
+                                    if (param.squeeze) body.style.top = param.size;
+                                    if (param.push) {
+                                        body.style.top = param.size;
+                                        body.style.bottom = "-" + param.size;
+                                    }
+                                    break;
+                                case 'bottom':
+                                    slider.style.height = param.size;
+                                    if (param.squeeze) body.style.bottom = param.size;
+                                    if (param.push) {
+                                        body.style.bottom = param.size;
+                                        body.style.top = "-" + param.size;
+                                    }
+                                    break;
+                            }
+
+                            body.className += ' ' + param.pushClass;
+
+                            setTimeout(function(){
+                                if (param.cloak) content.css('display', 'block');
+                            },(param.speed * 1000));
+
+                        }
+                    }
+
+                    function isFunction(functionToCheck){
+                        var getType = {};
+                        return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
+                    }
+
+                    /*
+                     * Watchers
+                     * */
+
+                    $scope.$watch("psOpen", function (value){
+                        if (!!value) {
+                            // Open
+                            psOpen(slider,param);
+                        } else {
+                            // Close
+                            psClose(slider,param);
+                        }
+                    });
+
+
+                    /*
+                     * Events
+                     * */
+
+                    $scope.$on('$destroy', function() {
+                        document.body.removeChild(slider);
+                    });
+
+                    if($scope.psAutoClose){
+                        $scope.$on("$locationChangeStart", function(){
+                            psClose(slider, param);
+                        });
+                        $scope.$on("$stateChangeStart", function(){
+                            psClose(slider, param);
+                        });
+
+                    }
                 }
-            }
-        };
-    }]);
+            };
+        }
+    ]);
+
