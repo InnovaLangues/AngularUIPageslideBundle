@@ -18,8 +18,9 @@ angular.module("pageslide-directive", [])
                     psSize: "@",
                     psSqueeze: "@",
                     psCloak: "@",
-                    psPush: "@",
-                    psPushClass: "@"
+                    psPush: "=?",
+                    psPushClass: "@",
+                    psPinClass: "@"
                 },
                 //template: '<div class="pageslide-content" ng-transclude></div>',
                 link: function ($scope, el, attrs) {
@@ -28,6 +29,7 @@ angular.module("pageslide-directive", [])
                     //console.log(el);
                     //console.log(attrs);
 
+                    $scope.psPush = $scope.psPush || false;
                     /* Parameters */
                     var param = {};
 
@@ -38,8 +40,8 @@ angular.module("pageslide-directive", [])
                     param.className = $scope.psClass || 'ng-pageslide';
                     param.cloak = $scope.psCloak && $scope.psCloak.toLowerCase() == 'false' ? false : true;
                     param.squeeze = Boolean($scope.psSqueeze) || false;
-                    param.push = Boolean($scope.psPush) || false;
                     param.pushClass = $scope.psPushClass || 'ng-pageslide-container';
+                    param.pinClass = $scope.psPinClass || 'ng-pageslide-pinned';
 
                     // Apply Class
                     el.addClass(param.className);
@@ -117,7 +119,7 @@ angular.module("pageslide-directive", [])
                                 case 'right':
                                     slider.style.width = '0px';
                                     if (param.squeeze) body.style.right = '0px';
-                                    if (param.push) {
+                                    if ($scope.psPush) {
                                         body.style.right = '0px';
                                         body.style.left = '0px';
                                     }
@@ -126,7 +128,7 @@ angular.module("pageslide-directive", [])
                                 case 'left':
                                     slider.style.width = '0px';
                                     if (param.squeeze) body.style.left = '0px';
-                                    if (param.push) {
+                                    if ($scope.psPush) {
                                         body.style.left = '0px';
                                         body.style.right = '0px';
                                     }
@@ -134,7 +136,7 @@ angular.module("pageslide-directive", [])
                                 case 'top':
                                     slider.style.height = '0px';
                                     if (param.squeeze) body.style.top = '0px';
-                                    if (param.push) {
+                                    if ($scope.psPush) {
                                         body.style.top = '0px';
                                         body.style.bottom = '0px';
                                     }
@@ -142,7 +144,7 @@ angular.module("pageslide-directive", [])
                                 case 'bottom':
                                     slider.style.height = '0px';
                                     if (param.squeeze) body.style.bottom = '0px';
-                                    if (param.push) {
+                                    if ($scope.psPush) {
                                         body.style.bottom = '0px';
                                         body.style.top = '0px';
                                     }
@@ -161,7 +163,7 @@ angular.module("pageslide-directive", [])
                                 case 'right':
                                     slider.style.width = param.size;
                                     if (param.squeeze) body.style.right = param.size;
-                                    if (param.push) {
+                                    if ($scope.psPush) {
                                         body.style.right = param.size;
                                         body.style.left = "-" + param.size;
                                     }
@@ -169,7 +171,7 @@ angular.module("pageslide-directive", [])
                                 case 'left':
                                     slider.style.width = param.size;
                                     if (param.squeeze) body.style.left = param.size;
-                                    if (param.push) {
+                                    if ($scope.psPush) {
                                         body.style.left = param.size;
                                         body.style.right = "-" + param.size;
                                     }
@@ -177,7 +179,7 @@ angular.module("pageslide-directive", [])
                                 case 'top':
                                     slider.style.height = param.size;
                                     if (param.squeeze) body.style.top = param.size;
-                                    if (param.push) {
+                                    if ($scope.psPush) {
                                         body.style.top = param.size;
                                         body.style.bottom = "-" + param.size;
                                     }
@@ -185,19 +187,70 @@ angular.module("pageslide-directive", [])
                                 case 'bottom':
                                     slider.style.height = param.size;
                                     if (param.squeeze) body.style.bottom = param.size;
-                                    if (param.push) {
+                                    if ($scope.psPush) {
                                         body.style.bottom = param.size;
                                         body.style.top = "-" + param.size;
                                     }
                                     break;
                             }
 
-                            body.className += ' ' + param.pushClass;
+                            body.className = body.className.trim() + ' ' + param.pushClass;
 
                             setTimeout(function(){
                                 if (param.cloak) content.css('display', 'block');
                             },(param.speed * 1000));
 
+                        }
+                    }
+
+                    /* Enable Push */
+                    function psEnablePush(slider, param) {
+                        if (slider && slider.style.width !== 0 && slider.style.width !== 0) {
+                            if ($scope.psOpen) {
+                                switch (param.side){
+                                    case 'right':
+                                        body.style.right = param.size;
+                                        body.style.left = "-" + param.size;
+                                        break;
+                                    case 'left':
+                                        body.style.left = param.size;
+                                        body.style.right = "-" + param.size;
+                                        break;
+                                    case 'top':
+                                        body.style.top = param.size;
+                                        body.style.bottom = "-" + param.size;
+                                        break;
+                                    case 'bottom':
+                                        body.style.bottom = param.size;
+                                        body.style.top = "-" + param.size;
+                                        break;
+                                }
+                            }
+                            if (body.className.indexOf(param.pinClass) == -1) {
+                                body.className = body.className.trim() + ' ' + param.pinClass;
+                            }
+                        }
+                    }
+
+                    /* Disable push */
+                    function psDisablePush(slider, param) {
+                        if (slider && slider.style.width !== 0 && slider.style.width !== 0) {
+                            if ($scope.psOpen) {
+                                switch (param.side){
+                                    case 'right':
+                                    case 'left':
+                                        body.style.right = '0px';
+                                        body.style.left = '0px';
+                                        break;
+                                    case 'top':
+                                    case 'bottom':
+                                        body.style.top = '0px';
+                                        body.style.bottom = '0px';
+                                        break;
+                                }
+                            }
+
+                            body.className = (body.className.replace(param.pinClass,'')).trim();
                         }
                     }
 
@@ -217,6 +270,16 @@ angular.module("pageslide-directive", [])
                         } else {
                             // Close
                             psClose(slider,param);
+                        }
+                    });
+
+                    $scope.$watch("psPush", function (value){
+                        if (!!value) {
+                            // Enable
+                            psEnablePush(slider,param);
+                        } else {
+                            // Disable
+                            psDisablePush(slider,param);
                         }
                     });
 
@@ -242,4 +305,3 @@ angular.module("pageslide-directive", [])
             };
         }
     ]);
-
